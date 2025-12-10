@@ -17,7 +17,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     category: 'Dairy',
     freshness: 15,
     stockLevel: 25,
-    price: 1.89
+    price: 1.89,
+    minThreshold: 200
   },
   {
     id: '2',
@@ -28,7 +29,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     category: 'Pantry',
     freshness: 100,
     stockLevel: 100,
-    price: 2.50
+    price: 2.50,
+    minThreshold: 100
   },
   {
     id: '3',
@@ -39,7 +41,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     category: 'Produce',
     freshness: 60,
     stockLevel: 60,
-    price: 3.20
+    price: 3.20,
+    minThreshold: 1
   },
   {
     id: '4',
@@ -50,7 +53,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     category: 'Produce',
     freshness: 20, // Close to spoiling
     stockLevel: 10,
-    price: 1.50
+    price: 1.50,
+    minThreshold: 1
   }
 ];
 
@@ -64,7 +68,8 @@ export const MOCK_SCANNED_ITEMS: InventoryItem[] = [
     category: 'Dairy',
     freshness: 95,
     stockLevel: 100,
-    price: 2.20
+    price: 2.20,
+    minThreshold: 100
   },
   {
     id: '6',
@@ -75,7 +80,8 @@ export const MOCK_SCANNED_ITEMS: InventoryItem[] = [
     category: 'Pantry',
     freshness: 90,
     stockLevel: 100,
-    price: 3.50
+    price: 3.50,
+    minThreshold: 1
   },
   {
     id: '7',
@@ -86,7 +92,8 @@ export const MOCK_SCANNED_ITEMS: InventoryItem[] = [
     category: 'Produce',
     freshness: 85,
     stockLevel: 100,
-    price: 1.99
+    price: 1.99,
+    minThreshold: 50
   },
   {
     id: '8',
@@ -97,7 +104,8 @@ export const MOCK_SCANNED_ITEMS: InventoryItem[] = [
     category: 'Beverage',
     freshness: 100,
     stockLevel: 100,
-    price: 2.80
+    price: 2.80,
+    minThreshold: 1
   }
 ];
 
@@ -111,7 +119,8 @@ export const MOCK_VIDEO_ITEMS: InventoryItem[] = [
     category: 'Snack',
     freshness: 30,
     stockLevel: 20,
-    price: 0.00
+    price: 0.00,
+    minThreshold: 1
   },
   {
     id: '10',
@@ -122,6 +131,7 @@ export const MOCK_VIDEO_ITEMS: InventoryItem[] = [
     category: 'Produce',
     freshness: 80,
     stockLevel: 80,
-    price: 1.20
+    price: 1.20,
+    minThreshold: 100
   }
 ];

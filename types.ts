@@ -11,6 +11,7 @@ export interface InventoryItem {
   stockLevel: number; // 0 to 100 (Representation of how full the container/stock is)
   price: number; // Estimated price in Euro
   image?: string; // Optional URL for visual
+  minThreshold?: number; // Minimum quantity before restock is triggered
 }
 
 export type AppView = 'dashboard' | 'inventory' | 'chef' | 'restock';

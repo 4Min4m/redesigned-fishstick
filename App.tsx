@@ -27,6 +27,19 @@ const App: React.FC = () => {
     addNotification(`${newItems.length} items added to inventory.`);
   };
 
+  // Handler: Delete item
+  const handleDeleteItem = (id: string) => {
+    setInventory(prev => prev.filter(item => item.id !== id));
+    addNotification("Item removed from inventory.");
+  };
+
+  // Handler: Update Threshold
+  const handleUpdateThreshold = (id: string, newThreshold: number) => {
+    setInventory(prev => prev.map(item => 
+        item.id === id ? { ...item, minThreshold: newThreshold } : item
+    ));
+  };
+
   // Handler: Cook (Remove/Decrement items)
   const handleCook = (ingredientIds: string[]) => {
       // In a real app we might decrement quantity. Here we act as if we used the item up or significantly reduced it.
@@ -34,8 +47,8 @@ const App: React.FC = () => {
       setInventory(prev => prev.map(item => {
           if (ingredientIds.includes(item.id)) {
               if (item.quantity <= 1) {
-                   // If it's a single item (1 unit), effectively remove it or mark empty
-                   // For this demo, let's remove it to show impact
+                   // If it's a single item (1 unit), effectively remove it or mark empty (0 quantity)
+                   // We keep the item in the list so it can appear in Restock if quantity <= threshold
                    return { ...item, quantity: 0, stockLevel: 0, freshness: 0 };
               } else {
                   // Reduce stock
@@ -43,7 +56,7 @@ const App: React.FC = () => {
               }
           }
           return item;
-      }).filter(item => item.quantity > 0)); // Filter out empty items
+      })); // We do NOT filter out empty items anymore, so they can be restocked
       
       addNotification("Meal prepared. Inventory updated.");
   };
@@ -54,6 +67,7 @@ const App: React.FC = () => {
           if (itemIds.includes(item.id)) {
               return { 
                 ...item, 
+                quantity: (item.minThreshold || 1) * 2 + 5, // Restock to above threshold
                 stockLevel: 100, 
                 freshness: 100, 
                 expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Reset expiry to +7 days
@@ -69,7 +83,7 @@ const App: React.FC = () => {
       case 'dashboard':
         return <Dashboard inventory={inventory} onAddItems={handleAddItems} onViewAll={() => setCurrentView('inventory')} />;
       case 'inventory':
-        return <Inventory inventory={inventory} />;
+        return <Inventory inventory={inventory} onDelete={handleDeleteItem} onUpdateThreshold={handleUpdateThreshold} />;
       case 'chef':
         return <Chef inventory={inventory} onCook={handleCook} />;
       case 'restock':

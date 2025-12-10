@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChefHat, Sparkles, Utensils, ArrowRight, Loader2 } from 'lucide-react';
+import { ChefHat, Sparkles, Utensils, ArrowRight, Loader2, Zap } from 'lucide-react';
 import type { InventoryItem, Recipe } from '../types';
 import { suggestRecipeMock } from '../services/aiService';
 
@@ -22,13 +22,14 @@ const Chef: React.FC<ChefProps> = ({ inventory, onCook }) => {
     }
   }, [messages]);
 
-  const handleAsk = async () => {
+  const handleAsk = async (promptText: string) => {
     setIsThinking(true);
     // Add user message
-    setMessages(prev => [...prev, { role: 'user', content: "What can I cook with my current ingredients?" }]);
+    setMessages(prev => [...prev, { role: 'user', content: promptText }]);
     
     try {
-      const recipe = await suggestRecipeMock(inventory);
+      // Pass the specific prompt to the service
+      const recipe = await suggestRecipeMock(inventory, promptText);
       setCurrentRecipe(recipe);
       
       if (recipe) {
@@ -36,7 +37,7 @@ const Chef: React.FC<ChefProps> = ({ inventory, onCook }) => {
             role: 'ai', 
             content: (
                 <div className="space-y-4">
-                    <p>Based on your inventory, I recommend optimizing for freshness. Here is a match:</p>
+                    <p>Based on your available inventory, here is a match:</p>
                     <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 shadow-lg">
                         <div className="flex items-center justify-between mb-2">
                              <h3 className="text-lg font-bold text-emerald-400">{recipe.name}</h3>
@@ -55,7 +56,13 @@ const Chef: React.FC<ChefProps> = ({ inventory, onCook }) => {
             ) 
         }]);
       } else {
-        setMessages(prev => [...prev, { role: 'ai', content: "I couldn't find a suitable recipe with your current items. Consider restocking basic produce." }]);
+        // Fallback for when no items or specific items are missing
+        const criticalMissing = inventory.filter(i => i.quantity === 0);
+        let msg = "I couldn't find a suitable recipe with your current available stock.";
+        if (criticalMissing.length > 0) {
+            msg += ` You are out of ${criticalMissing.slice(0, 2).map(i => i.name).join(' and ')}. Please check the Restock tab.`;
+        }
+        setMessages(prev => [...prev, { role: 'ai', content: msg }]);
       }
     } catch (error) {
        setMessages(prev => [...prev, { role: 'ai', content: "System error calculating recipes." }]);
@@ -72,6 +79,8 @@ const Chef: React.FC<ChefProps> = ({ inventory, onCook }) => {
     }]);
     setCurrentRecipe(null);
   };
+
+  const quickPrompts = ['Quick Lunch', 'Dinner Idea', 'Use expiring items'];
 
   return (
     <div className="h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -107,11 +116,28 @@ const Chef: React.FC<ChefProps> = ({ inventory, onCook }) => {
                 )}
             </div>
 
-            {/* Input Area (Mocked for specific functionality) */}
-            <div className="p-4 bg-slate-800/50 border-t border-slate-700">
+            {/* Input Area */}
+            <div className="p-4 bg-slate-800/50 border-t border-slate-700 space-y-4">
+                {/* Quick Prompts */}
+                {!currentRecipe && !isThinking && (
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                        {quickPrompts.map(prompt => (
+                            <button
+                                key={prompt}
+                                onClick={() => handleAsk(prompt)}
+                                className="whitespace-nowrap px-4 py-2 rounded-full bg-slate-800 border border-slate-700 hover:border-emerald-500/50 text-xs text-slate-300 hover:text-white transition-colors flex items-center gap-2"
+                            >
+                                <Zap size={12} className="text-emerald-500" />
+                                {prompt}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Main Action */}
                 {!currentRecipe && (
                     <button 
-                        onClick={handleAsk}
+                        onClick={() => handleAsk("What can I cook with my current ingredients?")}
                         disabled={isThinking}
                         className="w-full p-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold shadow-lg shadow-emerald-900/20 transition-all flex items-center justify-center gap-2 group"
                     >

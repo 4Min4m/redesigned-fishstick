@@ -21,13 +21,30 @@ export const analyzeFridgeMock = async (): Promise<InventoryItem[]> => {
   }));
 };
 
-export const suggestRecipeMock = async (inventory: InventoryItem[]): Promise<Recipe | null> => {
+export const suggestRecipeMock = async (inventory: InventoryItem[], prompt?: string): Promise<Recipe | null> => {
   await delay(1500);
 
+  // Filter available items (Quantity > 0)
+  const availableInventory = inventory.filter(i => i.quantity > 0);
+
   // AI Logic: Check for critical items
-  const expiringDairy = inventory.find(i => i.category === 'Dairy' && i.freshness < 30);
-  const pasta = inventory.find(i => i.name.toLowerCase().includes('pasta'));
+  const expiringDairy = availableInventory.find(i => i.category === 'Dairy' && i.freshness < 30);
+  const pasta = availableInventory.find(i => i.name.toLowerCase().includes('pasta'));
+  const veggies = availableInventory.filter(i => i.category === 'Produce');
   
+  // Logic for specific prompts
+  if (prompt === 'Quick Lunch') {
+      if (veggies.length > 0) {
+        return {
+            id: 'rec_3',
+            name: 'Kitchen Sink Salad',
+            description: 'A quick, healthy detox bowl using your available produce.',
+            ingredientsNeeded: veggies.map(v => v.id),
+            calories: 320
+        };
+      }
+  }
+
   if (expiringDairy && expiringDairy.name.toLowerCase().includes('milk')) {
     return {
       id: 'rec_1',
@@ -43,16 +60,21 @@ export const suggestRecipeMock = async (inventory: InventoryItem[]): Promise<Rec
       id: 'rec_2',
       name: 'Pasta Primavera',
       description: 'A classic way to use up fresh vegetables and your pasta stock.',
-      ingredientsNeeded: [pasta.id],
+      ingredientsNeeded: [pasta.id, ...veggies.map(v => v.id)],
       calories: 600
     };
   }
 
-  return {
-    id: 'rec_3',
-    name: 'Kitchen Sink Salad',
-    description: 'Combine all your remaining produce for a healthy detox bowl.',
-    ingredientsNeeded: [],
-    calories: 320
-  };
+  if (availableInventory.length > 0) {
+      return {
+        id: 'rec_3',
+        name: 'Kitchen Sink Salad',
+        description: 'Combine all your remaining produce for a healthy detox bowl.',
+        ingredientsNeeded: veggies.map(v => v.id),
+        calories: 320
+      };
+  }
+
+  // If nothing is available
+  return null;
 };
